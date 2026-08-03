@@ -20,8 +20,6 @@ import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 
@@ -95,9 +93,9 @@ public final class ModProfessions {
 		// sells the mixed liquid bottle.
 		TradeOfferHelper.registerVillagerOffers(NATURALIST, 3, trades -> {
 			trades.add((level, trader, random) -> {
-				ItemCost nectar = new ItemCost(Items.POTION, 1).withComponents(builder -> builder.expect(
-						DataComponents.POTION_CONTENTS,
-						new PotionContents(needsofNaturePotion("fertile_nectar"))));
+				// Downgraded to plain POTION cost to avoid ClientboundMerchantOffersPacket
+				// encode/decode crashes caused by complex DataComponentExactPredicate sync.
+				ItemCost nectar = new ItemCost(Items.POTION, 1);
 				return new MerchantOffer(nectar, new ItemStack(Items.EMERALD, 5), 12, 6, 0.05F);
 			});
 			trades.add((level, trader, random) -> new MerchantOffer(
@@ -132,9 +130,4 @@ public final class ModProfessions {
 		return new ItemStack(needsofNatureItem(path));
 	}
 
-	private static Holder<Potion> needsofNaturePotion(String path) {
-		ResourceKey<Potion> key = ResourceKey.create(Registries.POTION,
-				Identifier.fromNamespaceAndPath("needsofnature", path));
-		return BuiltInRegistries.POTION.getOrThrow(key);
-	}
 }
