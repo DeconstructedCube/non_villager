@@ -56,10 +56,8 @@ public final class ModProfessions {
 	private static void registerProfession() {
 		// The leatherworker owns every cauldron block state (PoiTypes.CAULDRONS).
 		// PoiTypes rejects double registration, so strip the powder snow cauldron from
-		// both the CAULDRONS set and the TYPE_BY_STATE map (the single runtime lookup —
-		// PoiManager creates POI records solely via PoiTypes.forState), then claim it.
-		PoiTypesAccessor.getCauldrons()
-				.removeIf(state -> state.getBlock() == Blocks.POWDER_SNOW_CAULDRON);
+		// the TYPE_BY_STATE map — the single runtime lookup, since PoiManager creates
+		// POI records solely via PoiTypes.forState — then claim it for ourselves.
 		PoiTypesAccessor.getTypeByState().keySet()
 				.removeIf(state -> state.getBlock() == Blocks.POWDER_SNOW_CAULDRON);
 

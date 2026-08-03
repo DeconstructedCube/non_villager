@@ -1,7 +1,6 @@
 package com.bsfdsagfadg.non_villager.mixin;
 
 import java.util.Map;
-import java.util.Set;
 
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
@@ -15,11 +14,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface PoiTypesAccessor {
 	@Accessor("TYPE_BY_STATE")
 	static Map<BlockState, Holder<PoiType>> getTypeByState() {
-		throw new AssertionError();
-	}
-
-	@Accessor("CAULDRONS")
-	static Set<BlockState> getCauldrons() {
 		throw new AssertionError();
 	}
 }
