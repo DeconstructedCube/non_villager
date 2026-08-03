@@ -25,6 +25,8 @@ import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 
+import com.bsfdsagfadg.non_villager.mixin.PoiTypesAccessor;
+
 /**
  * Registers the Naturalist villager profession and its trades.
  *
@@ -52,11 +54,18 @@ public final class ModProfessions {
 	}
 
 	private static void registerProfession() {
-		// Job site: honey block — sticky and viscous, fitting the "liquid" theme,
-		// craftable from the honey bottles this villager buys, and not claimed by any vanilla POI.
+		// The leatherworker owns every cauldron block state (PoiTypes.CAULDRONS).
+		// PoiTypes rejects double registration, so strip the powder snow cauldron from
+		// both the CAULDRONS set and the TYPE_BY_STATE map (the single runtime lookup —
+		// PoiManager creates POI records solely via PoiTypes.forState), then claim it.
+		PoiTypesAccessor.getCauldrons()
+				.removeIf(state -> state.getBlock() == Blocks.POWDER_SNOW_CAULDRON);
+		PoiTypesAccessor.getTypeByState().keySet()
+				.removeIf(state -> state.getBlock() == Blocks.POWDER_SNOW_CAULDRON);
+
 		NATURALIST_POI = net.fabricmc.fabric.api.object.builder.v1.world.poi.PointOfInterestHelper.register(
 				Identifier.fromNamespaceAndPath(NonVillagerMod.MOD_ID, "naturalist_poi"),
-				1, 1, Blocks.HONEY_BLOCK);
+				1, 1, Blocks.POWDER_SNOW_CAULDRON);
 
 		Registry.register(BuiltInRegistries.VILLAGER_PROFESSION, NATURALIST, new VillagerProfession(
 				Component.translatable("entity.minecraft.villager.naturalist"),
