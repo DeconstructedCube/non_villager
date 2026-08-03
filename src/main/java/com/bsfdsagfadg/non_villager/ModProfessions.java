@@ -10,10 +10,12 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -35,6 +37,12 @@ public final class ModProfessions {
 			Registries.VILLAGER_PROFESSION,
 			Identifier.fromNamespaceAndPath(NonVillagerMod.MOD_ID, "naturalist"));
 
+	public static final ResourceKey<PoiType> NATURALIST_POI_KEY = ResourceKey.create(
+			Registries.POINT_OF_INTEREST_TYPE,
+			Identifier.fromNamespaceAndPath(NonVillagerMod.MOD_ID, "naturalist_poi"));
+
+	public static PoiType NATURALIST_POI;
+
 	private ModProfessions() {
 	}
 
@@ -44,11 +52,15 @@ public final class ModProfessions {
 	}
 
 	private static void registerProfession() {
-		// Job site: beehive — vanilla PoiTypes.BEEHIVE, so no new POI type is needed.
+		// Use End Rod as the job block (for its "implications" matching the mod's theme)
+		NATURALIST_POI = net.fabricmc.fabric.api.object.builder.v1.world.poi.PointOfInterestHelper.register(
+				Identifier.fromNamespaceAndPath(NonVillagerMod.MOD_ID, "naturalist_poi"),
+				1, 1, Blocks.END_ROD);
+
 		Registry.register(BuiltInRegistries.VILLAGER_PROFESSION, NATURALIST, new VillagerProfession(
 				Component.translatable("entity.minecraft.villager.naturalist"),
-				poi -> poi.is(PoiTypes.BEEHIVE),
-				poi -> poi.is(PoiTypes.BEEHIVE),
+				poi -> poi.is(NATURALIST_POI_KEY),
+				poi -> poi.is(NATURALIST_POI_KEY),
 				ImmutableSet.of(),
 				ImmutableSet.of(),
 				SoundEvents.VILLAGER_WORK_FARMER));
