@@ -21,7 +21,8 @@ public class NonVillagerMod implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 
-		LOGGER.info("Hello Fabric world!");
+		ModProfessions.register();
+		LOGGER.info("NoN Villager Professions initialized.");
 	}
 
 	public static Identifier id(String path) {
