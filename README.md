@@ -32,7 +32,7 @@ a warning is logged instead of crashing if the mod is missing.
 - Fabric Loader ≥ 0.19.3
 - Fabric API
 - Java 21
-- [Needs of Nature](https://github.com/) (needsofnature) — source of the traded mod items, plus its default content pack for the liquid bottle textures
+- [Needs of Nature](https://www.loverslab.com/topic/267804-mod-minecraft-needs-of-nature-nsfw-mod-data-driven-sex-animation-mod-for-minecraft-fabric-12111) (needsofnature) — source of the traded mod items, plus its default content pack for the liquid bottle textures
 
 ## Setup
 
