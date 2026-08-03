@@ -217,7 +217,8 @@ public final class ModProfessions {
 			Class<?> modClass = Class.forName("com.nonid.NonItemSystem");
 			Method createMethod = null;
 			for (Method method : modClass.getDeclaredMethods()) {
-				if (method.getParameterCount() == 1
+				if ("createLiquidBottleStack".equals(method.getName())
+						&& method.getParameterCount() == 1
 						&& method.getParameterTypes()[0] == Identifier.class
 						&& method.getReturnType() == ItemStack.class) {
 					createMethod = method;
