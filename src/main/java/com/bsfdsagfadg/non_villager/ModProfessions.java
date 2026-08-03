@@ -55,7 +55,7 @@ public final class ModProfessions {
 		// Use End Rod as the job block (for its "implications" matching the mod's theme)
 		NATURALIST_POI = net.fabricmc.fabric.api.object.builder.v1.world.poi.PointOfInterestHelper.register(
 				Identifier.fromNamespaceAndPath(NonVillagerMod.MOD_ID, "naturalist_poi"),
-				1, 1, Blocks.END_ROD);
+				1, 1, Blocks.POWDER_SNOW_CAULDRON);
 
 		Registry.register(BuiltInRegistries.VILLAGER_PROFESSION, NATURALIST, new VillagerProfession(
 				Component.translatable("entity.minecraft.villager.naturalist"),
