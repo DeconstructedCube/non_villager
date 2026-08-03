@@ -1,5 +1,8 @@
 package com.bsfdsagfadg.non_villager;
 
+import java.lang.reflect.Method;
+import java.util.List;
+
 import com.google.common.collect.ImmutableSet;
 
 import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
@@ -13,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
@@ -34,9 +38,11 @@ import com.bsfdsagfadg.non_villager.mixin.PoiTypesAccessor;
  * wrapper exists for it in 1.21.11); trades go through Fabric API's
  * {@link TradeOfferHelper}.
  *
- * <p>NeedsofNature "liquid bottles" are not registered items: they are vanilla
- * potion stacks carrying the {@code needsofnature:liquid} potion plus a custom
- * name. We build them the same way instead of looking up a registry entry.
+ * <p>NeedsofNature "liquid bottles" are not registered items — they are vanilla
+ * potion stacks built by the mod's own {@code NonItemSystem.createLiquidBottleStack}.
+ * We invoke that method via reflection so the traded items are byte-for-byte
+ * identical to the mod's (same components, tint, stacking, tooltips), which keeps
+ * textures working without Optifine and makes the bottles stackable.
  */
 public final class ModProfessions {
 	public static final ResourceKey<VillagerProfession> NATURALIST = ResourceKey.create(
@@ -48,6 +54,21 @@ public final class ModProfessions {
 			Identifier.fromNamespaceAndPath(NonVillagerMod.MOD_ID, "naturalist_poi"));
 
 	public static PoiType NATURALIST_POI;
+
+	/** Animals whose liquid can be bottled, for the master-level random trade. */
+	private static final List<Identifier> VALID_ENTITIES = List.of(
+			Identifier.withDefaultNamespace("cow"),
+			Identifier.withDefaultNamespace("pig"),
+			Identifier.withDefaultNamespace("sheep"),
+			Identifier.withDefaultNamespace("horse"),
+			Identifier.withDefaultNamespace("donkey"),
+			Identifier.withDefaultNamespace("mule"),
+			Identifier.withDefaultNamespace("fox"),
+			Identifier.withDefaultNamespace("wolf"),
+			Identifier.withDefaultNamespace("cat"),
+			Identifier.withDefaultNamespace("dolphin"),
+			Identifier.withDefaultNamespace("polar_bear"),
+			Identifier.withDefaultNamespace("rabbit"));
 
 	private ModProfessions() {
 	}
@@ -105,50 +126,69 @@ public final class ModProfessions {
 				return new MerchantOffer(cost, new ItemStack(Items.EMERALD, 5), 12, 6, 0.05F);
 			});
 			trades.add((level, trader, random) -> {
-				ItemStack bottle = liquidBottle("item.needsofnature.mixed_liquid_bottle", null);
+				ItemStack bottle = buildLiquidBottle(null);
 				if (bottle == null) return null;
 				return new MerchantOffer(new ItemCost(Items.EMERALD, 8), bottle, 4, 10, 0.2F);
 			});
 		});
 
-		// Level 4 (Expert) — flower mix is bought and sold.
+		// Level 4 (Expert) — flower mix is bought and sold. Three flowers craft one mix,
+		// so it is a cheap commodity: 4 mixes for 1 emerald, or 2 mixes for 1 emerald.
 		TradeOfferHelper.registerVillagerOffers(NATURALIST, 4, trades -> {
 			trades.add((level, trader, random) -> {
 				Item flowerMix = needsofNatureItem("flower_mix");
 				if (flowerMix == Items.AIR) return null;
-				return new MerchantOffer(new ItemCost(flowerMix, 2), new ItemStack(Items.EMERALD, 3), 12, 8, 0.05F);
+				return new MerchantOffer(new ItemCost(flowerMix, 4), new ItemStack(Items.EMERALD), 12, 8, 0.05F);
 			});
 			trades.add((level, trader, random) -> {
 				Item flowerMix = needsofNatureItem("flower_mix");
 				if (flowerMix == Items.AIR) return null;
-				return new MerchantOffer(new ItemCost(Items.EMERALD, 5), new ItemStack(flowerMix), 12, 8, 0.05F);
+				return new MerchantOffer(new ItemCost(Items.EMERALD), new ItemStack(flowerMix, 2), 12, 8, 0.05F);
 			});
 		});
 
-		// Level 5 (Master) — the entity liquid bottle.
+		// Level 5 (Master) — a random animal's liquid bottle.
 		TradeOfferHelper.registerVillagerOffers(NATURALIST, 5, trades -> {
 			trades.add((level, trader, random) -> {
-				ItemStack bottle = liquidBottle("item.needsofnature.entity_liquid_bottle", "entity.minecraft.hoglin");
+				ItemStack bottle = buildLiquidBottle(getRandomEntityId(random));
 				if (bottle == null) return null;
 				return new MerchantOffer(new ItemCost(Items.EMERALD, 12), bottle, 4, 12, 0.2F);
 			});
 		});
 	}
 
+	private static Identifier getRandomEntityId(RandomSource random) {
+		return VALID_ENTITIES.get(random.nextInt(VALID_ENTITIES.size()));
+	}
+
 	/**
-	 * Builds a liquid bottle the way NeedsofNature does: a vanilla potion stack
-	 * carrying the {@code needsofnature:liquid} potion and a custom name.
-	 * Returns {@code null} when the liquid potion is unavailable.
+	 * Invokes the mod's own {@code NonItemSystem.createLiquidBottleStack} via reflection,
+	 * so the sold item is identical to what the mod itself produces (same components,
+	 * tint, max stack size 16, food, tooltip, custom name). {@code null} produces the
+	 * mixed bottle; an entity id produces the {@code <entity> 精液瓶} variant.
+	 * Returns {@code null} when the mod is unavailable.
 	 */
-	private static ItemStack liquidBottle(String nameKey, String entityNameKey) {
-		Holder<Potion> liquid = needsofNaturePotion("liquid");
-		if (liquid == null) return null;
-		ItemStack stack = PotionContents.createItemStack(Items.POTION, liquid);
-		net.minecraft.network.chat.MutableComponent name = entityNameKey == null
-				? Component.translatable(nameKey)
-				: Component.translatable(nameKey, Component.translatable(entityNameKey));
-		stack.set(DataComponents.CUSTOM_NAME, name.withStyle(s -> s.withItalic(false)));
-		return stack;
+	private static ItemStack buildLiquidBottle(Identifier entityTypeId) {
+		try {
+			Class<?> modClass = Class.forName("com.nonid.NonItemSystem");
+			Method createMethod = null;
+			for (Method method : modClass.getDeclaredMethods()) {
+				if (method.getParameterCount() == 1
+						&& method.getParameterTypes()[0] == Identifier.class
+						&& method.getReturnType() == ItemStack.class) {
+					createMethod = method;
+					break;
+				}
+			}
+			if (createMethod != null) {
+				createMethod.setAccessible(true);
+				return (ItemStack) createMethod.invoke(null, entityTypeId);
+			}
+			NonVillagerMod.LOGGER.error("Could not find createLiquidBottleStack in com.nonid.NonItemSystem");
+		} catch (Exception e) {
+			NonVillagerMod.LOGGER.error("Failed to create NeedsofNature liquid bottle", e);
+		}
+		return null;
 	}
 
 	private static Item needsofNatureItem(String path) {
