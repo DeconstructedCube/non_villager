@@ -1,7 +1,9 @@
 package com.bsfdsagfadg.non_villager;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -55,8 +57,8 @@ public final class ModProfessions {
 
 	public static PoiType NATURALIST_POI;
 
-	/** Animals whose liquid can be bottled, for the master-level random trade. */
-	private static final List<Identifier> VALID_ENTITIES = List.of(
+	/** Fallback animals if the mod's liquid gain map is unavailable. */
+	private static final List<Identifier> FALLBACK_ENTITIES = List.of(
 			Identifier.withDefaultNamespace("cow"),
 			Identifier.withDefaultNamespace("pig"),
 			Identifier.withDefaultNamespace("sheep"),
@@ -69,6 +71,9 @@ public final class ModProfessions {
 			Identifier.withDefaultNamespace("dolphin"),
 			Identifier.withDefaultNamespace("polar_bear"),
 			Identifier.withDefaultNamespace("rabbit"));
+
+	/** Lazily resolved entity types that can produce liquid, from the mod's own data. */
+	private static List<Identifier> liquidEntities;
 
 	private ModProfessions() {
 	}
@@ -158,7 +163,46 @@ public final class ModProfessions {
 	}
 
 	private static Identifier getRandomEntityId(RandomSource random) {
-		return VALID_ENTITIES.get(random.nextInt(VALID_ENTITIES.size()));
+		List<Identifier> candidates = liquidEntities();
+		return candidates.get(random.nextInt(candidates.size()));
+	}
+
+	/**
+	 * Resolves the entity types that can produce liquid by invoking the mod's
+	 * {@code NonLiquidSystem.resolveEffectiveLiquidGainMap} via reflection. The result
+	 * comes from the mod's own liquid gain data (liquid_gains.json) and is cached;
+	 * falls back to {@link #FALLBACK_ENTITIES} when the mod is unavailable.
+	 */
+	private static List<Identifier> liquidEntities() {
+		if (liquidEntities == null) {
+			List<Identifier> resolved = new ArrayList<>();
+			try {
+				Class<?> modClass = Class.forName("com.nonid.NonLiquidSystem");
+				Method gainMapMethod = null;
+				for (Method method : modClass.getDeclaredMethods()) {
+					if ("resolveEffectiveLiquidGainMap".equals(method.getName())
+							&& method.getParameterCount() == 0
+							&& method.getReturnType() == Map.class) {
+						gainMapMethod = method;
+						break;
+					}
+				}
+				if (gainMapMethod != null) {
+					gainMapMethod.setAccessible(true);
+					Map<?, ?> map = (Map<?, ?>) gainMapMethod.invoke(null);
+					for (Object key : map.keySet()) {
+						Identifier parsed = Identifier.tryParse(String.valueOf(key));
+						if (parsed != null) resolved.add(parsed);
+					}
+				} else {
+					NonVillagerMod.LOGGER.warn("resolveEffectiveLiquidGainMap not found in com.nonid.NonLiquidSystem");
+				}
+			} catch (Exception e) {
+				NonVillagerMod.LOGGER.error("Failed to resolve NeedsofNature liquid entities", e);
+			}
+			liquidEntities = resolved.isEmpty() ? FALLBACK_ENTITIES : List.copyOf(resolved);
+		}
+		return liquidEntities;
 	}
 
 	/**
