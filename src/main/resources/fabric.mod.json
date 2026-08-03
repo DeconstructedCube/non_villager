@@ -17,18 +17,8 @@
 	"entrypoints": {
 		"main": [
 			"com.bsfdsagfadg.non_villager.NonVillagerMod"
-		],
-		"client": [
-			"com.bsfdsagfadg.non_villager.client.NonVillagerModClient"
 		]
 	},
-	"mixins": [
-		"non_villager.mixins.json",
-		{
-			"config": "non_villager.client.mixins.json",
-			"environment": "client"
-		}
-	],
 	"depends": {
 		"fabricloader": ">=0.19.3",
 		"minecraft": "~1.21.11",
