@@ -15,13 +15,15 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.level.block.Blocks;
 
 import com.bsfdsagfadg.non_villager.mixin.PoiTypesAccessor;
 
@@ -31,6 +33,10 @@ import com.bsfdsagfadg.non_villager.mixin.PoiTypesAccessor;
  * <p>Profession itself goes through the vanilla registry (no Fabric API
  * wrapper exists for it in 1.21.11); trades go through Fabric API's
  * {@link TradeOfferHelper}.
+ *
+ * <p>NeedsofNature "liquid bottles" are not registered items: they are vanilla
+ * potion stacks carrying the {@code needsofnature:liquid} potion plus a custom
+ * name. We build them the same way instead of looking up a registry entry.
  */
 public final class ModProfessions {
 	public static final ResourceKey<VillagerProfession> NATURALIST = ResourceKey.create(
@@ -89,45 +95,78 @@ public final class ModProfessions {
 					new ItemCost(Items.EMERALD), new ItemStack(Items.WARPED_FUNGUS), 12, 4, 0.05F));
 		});
 
-		// Level 3 (Journeyman) — buys fertile nectar (NeedsofNature potion),
-		// sells the mixed liquid bottle.
+		// Level 3 (Journeyman) — buys fertile nectar (exact potion match), sells the mixed liquid bottle.
 		TradeOfferHelper.registerVillagerOffers(NATURALIST, 3, trades -> {
 			trades.add((level, trader, random) -> {
-				// Downgraded to plain POTION cost to avoid ClientboundMerchantOffersPacket
-				// encode/decode crashes caused by complex DataComponentExactPredicate sync.
-				ItemCost nectar = new ItemCost(Items.POTION, 1);
-				return new MerchantOffer(nectar, new ItemStack(Items.EMERALD, 5), 12, 6, 0.05F);
+				Holder<Potion> nectar = needsofNaturePotion("fertile_nectar");
+				if (nectar == null) return null;
+				ItemCost cost = new ItemCost(Items.POTION, 1).withComponents(builder -> builder.expect(
+						DataComponents.POTION_CONTENTS, new PotionContents(nectar)));
+				return new MerchantOffer(cost, new ItemStack(Items.EMERALD, 5), 12, 6, 0.05F);
 			});
-			trades.add((level, trader, random) -> new MerchantOffer(
-					new ItemCost(Items.EMERALD, 8), needsofNatureStack("mixed_liquid_bottle"), 4, 10, 0.2F));
+			trades.add((level, trader, random) -> {
+				ItemStack bottle = liquidBottle("item.needsofnature.mixed_liquid_bottle", null);
+				if (bottle == null) return null;
+				return new MerchantOffer(new ItemCost(Items.EMERALD, 8), bottle, 4, 10, 0.2F);
+			});
 		});
 
 		// Level 4 (Expert) — flower mix is bought and sold.
 		TradeOfferHelper.registerVillagerOffers(NATURALIST, 4, trades -> {
-			trades.add((level, trader, random) -> new MerchantOffer(
-					new ItemCost(needsofNatureItem("flower_mix"), 2), new ItemStack(Items.EMERALD, 3), 12, 8, 0.05F));
-			trades.add((level, trader, random) -> new MerchantOffer(
-					new ItemCost(Items.EMERALD, 5), needsofNatureStack("flower_mix"), 12, 8, 0.05F));
+			trades.add((level, trader, random) -> {
+				Item flowerMix = needsofNatureItem("flower_mix");
+				if (flowerMix == Items.AIR) return null;
+				return new MerchantOffer(new ItemCost(flowerMix, 2), new ItemStack(Items.EMERALD, 3), 12, 8, 0.05F);
+			});
+			trades.add((level, trader, random) -> {
+				Item flowerMix = needsofNatureItem("flower_mix");
+				if (flowerMix == Items.AIR) return null;
+				return new MerchantOffer(new ItemCost(Items.EMERALD, 5), new ItemStack(flowerMix), 12, 8, 0.05F);
+			});
 		});
 
 		// Level 5 (Master) — the entity liquid bottle.
 		TradeOfferHelper.registerVillagerOffers(NATURALIST, 5, trades -> {
-			trades.add((level, trader, random) -> new MerchantOffer(
-					new ItemCost(Items.EMERALD, 12), needsofNatureStack("entity_liquid_bottle"), 4, 12, 0.2F));
+			trades.add((level, trader, random) -> {
+				ItemStack bottle = liquidBottle("item.needsofnature.entity_liquid_bottle", "entity.minecraft.hoglin");
+				if (bottle == null) return null;
+				return new MerchantOffer(new ItemCost(Items.EMERALD, 12), bottle, 4, 12, 0.2F);
+			});
 		});
+	}
+
+	/**
+	 * Builds a liquid bottle the way NeedsofNature does: a vanilla potion stack
+	 * carrying the {@code needsofnature:liquid} potion and a custom name.
+	 * Returns {@code null} when the liquid potion is unavailable.
+	 */
+	private static ItemStack liquidBottle(String nameKey, String entityNameKey) {
+		Holder<Potion> liquid = needsofNaturePotion("liquid");
+		if (liquid == null) return null;
+		ItemStack stack = PotionContents.createItemStack(Items.POTION, liquid);
+		net.minecraft.network.chat.MutableComponent name = entityNameKey == null
+				? Component.translatable(nameKey)
+				: Component.translatable(nameKey, Component.translatable(entityNameKey));
+		stack.set(DataComponents.CUSTOM_NAME, name.withStyle(s -> s.withItalic(false)));
+		return stack;
 	}
 
 	private static Item needsofNatureItem(String path) {
 		Item item = BuiltInRegistries.ITEM.getValue(
 				Identifier.fromNamespaceAndPath("needsofnature", path));
 		if (item == Items.AIR) {
-			NonVillagerMod.LOGGER.warn("NeedsofNature item '{}' not found; trade will be broken.", path);
+			NonVillagerMod.LOGGER.warn("NeedsofNature item '{}' not found; its trades will be skipped.", path);
 		}
 		return item;
 	}
 
-	private static ItemStack needsofNatureStack(String path) {
-		return new ItemStack(needsofNatureItem(path));
+	private static Holder<Potion> needsofNaturePotion(String path) {
+		ResourceKey<Potion> key = ResourceKey.create(Registries.POTION,
+				Identifier.fromNamespaceAndPath("needsofnature", path));
+		Holder<Potion> holder = BuiltInRegistries.POTION.get(key).orElse(null);
+		if (holder == null) {
+			NonVillagerMod.LOGGER.warn("NeedsofNature potion '{}' not found; its trades will be skipped.", path);
+		}
+		return holder;
 	}
-
 }
