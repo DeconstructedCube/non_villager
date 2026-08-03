@@ -7,11 +7,8 @@ A Fabric mod that adds custom villager professions — without relying on villag
 ### Naturalist (自然学家)
 
 A villager profession themed around nature and life essence, with its work site at a
-**powder snow cauldron** (细雪炼药锅).
-
-> Note: registering the powder snow cauldron as the Naturalist's job site overrides the
-> vanilla Leatherworker's claim on that block — leatherworkers will no longer recognize
-> powder snow cauldrons (empty/water/lava cauldrons are unaffected).
+**honey block** — sticky and viscous like the goods it deals in, and craftable from the
+honey bottles the Naturalist buys.
 
 **Trades** (Fabric API `TradeOfferHelper`, 5 levels):
 

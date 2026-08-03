@@ -52,10 +52,11 @@ public final class ModProfessions {
 	}
 
 	private static void registerProfession() {
-		// Use End Rod as the job block (for its "implications" matching the mod's theme)
+		// Job site: honey block — sticky and viscous, fitting the "liquid" theme,
+		// craftable from the honey bottles this villager buys, and not claimed by any vanilla POI.
 		NATURALIST_POI = net.fabricmc.fabric.api.object.builder.v1.world.poi.PointOfInterestHelper.register(
 				Identifier.fromNamespaceAndPath(NonVillagerMod.MOD_ID, "naturalist_poi"),
-				1, 1, Blocks.POWDER_SNOW_CAULDRON);
+				1, 1, Blocks.HONEY_BLOCK);
 
 		Registry.register(BuiltInRegistries.VILLAGER_PROFESSION, NATURALIST, new VillagerProfession(
 				Component.translatable("entity.minecraft.villager.naturalist"),
