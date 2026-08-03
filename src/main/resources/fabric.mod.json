@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "non_villager",
+	"version": "${version}",
+	"name": "NoN Villager Professions",
+	"description": "Custom villager professions without villager breeding. Add your own profession logic here.",
+	"authors": [
+		"bsfdsagfadg"
+	],
+	"contact": {
+		"homepage": "https://github.com/bsfdsagfadg",
+		"sources": "https://github.com/bsfdsagfadg/non_villager"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/non_villager/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.bsfdsagfadg.non_villager.NonVillagerMod"
+		],
+		"client": [
+			"com.bsfdsagfadg.non_villager.client.NonVillagerModClient"
+		]
+	},
+	"mixins": [
+		"non_villager.mixins.json",
+		{
+			"config": "non_villager.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
