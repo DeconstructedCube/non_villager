@@ -11,7 +11,7 @@ import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.DataComponentExactPredicate;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -26,7 +26,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.block.Blocks;
@@ -126,8 +125,10 @@ public final class ModProfessions {
 			trades.add((level, trader, random) -> {
 				Holder<Potion> nectar = needsofNaturePotion("fertile_nectar");
 				if (nectar == null) return null;
-				ItemCost cost = new ItemCost(Items.POTION, 1).withComponents(builder -> builder.expect(
-						DataComponents.POTION_CONTENTS, new PotionContents(nectar)));
+				ItemStack nectarBottle = buildFertileNectarBottle(nectar);
+				if (nectarBottle == null) return null;
+				ItemCost cost = new ItemCost(nectarBottle.getItemHolder(), 1,
+						DataComponentExactPredicate.allOf(nectarBottle.getComponents()));
 				return new MerchantOffer(cost, new ItemStack(Items.EMERALD, 5), 12, 6, 0.05F);
 			});
 			trades.add((level, trader, random) -> {
@@ -232,6 +233,33 @@ public final class ModProfessions {
 			NonVillagerMod.LOGGER.error("Could not find createLiquidBottleStack in com.nonid.NonItemSystem");
 		} catch (Exception e) {
 			NonVillagerMod.LOGGER.error("Failed to create NeedsofNature liquid bottle", e);
+		}
+		return null;
+	}
+
+	/**
+	 * Builds the exact fertile nectar bottle the mod's own crafting recipe produces
+	 * (potion contents + food + max stack 16 + honey drink consumable) by invoking
+	 * {@code NonItemSystem.createPotionVariantStack}. Used both as the trade's cost
+	 * predicate (exact component set) and as the client-side display stack, so the
+	 * offer renders the mod's nectar model. Returns {@code null} when unavailable.
+	 */
+	private static ItemStack buildFertileNectarBottle(Holder<Potion> nectar) {
+		try {
+			Class<?> modClass = Class.forName("com.nonid.NonItemSystem");
+			for (Method method : modClass.getDeclaredMethods()) {
+				if ("createPotionVariantStack".equals(method.getName())
+						&& method.getParameterCount() == 2
+						&& method.getParameterTypes()[0] == Item.class
+						&& method.getParameterTypes()[1] == Holder.class
+						&& method.getReturnType() == ItemStack.class) {
+					method.setAccessible(true);
+					return (ItemStack) method.invoke(null, Items.POTION, nectar);
+				}
+			}
+			NonVillagerMod.LOGGER.error("createPotionVariantStack not found in com.nonid.NonItemSystem");
+		} catch (Exception e) {
+			NonVillagerMod.LOGGER.error("Failed to build NeedsofNature fertile nectar bottle", e);
 		}
 		return null;
 	}
