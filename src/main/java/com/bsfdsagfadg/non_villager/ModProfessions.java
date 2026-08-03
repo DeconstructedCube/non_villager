@@ -72,7 +72,7 @@ public final class ModProfessions {
 		});
 
 		// Level 3 (Journeyman) — buys fertile nectar (NeedsofNature potion),
-		// sells the plain liquid bottle.
+		// sells the mixed liquid bottle.
 		TradeOfferHelper.registerVillagerOffers(NATURALIST, 3, trades -> {
 			trades.add((level, trader, random) -> {
 				ItemCost nectar = new ItemCost(Items.POTION, 1).withComponents(builder -> builder.expect(
@@ -81,7 +81,7 @@ public final class ModProfessions {
 				return new MerchantOffer(nectar, new ItemStack(Items.EMERALD, 5), 12, 6, 0.05F);
 			});
 			trades.add((level, trader, random) -> new MerchantOffer(
-					new ItemCost(Items.EMERALD, 8), needsofNatureStack("entity_liquid_bottle"), 4, 10, 0.2F));
+					new ItemCost(Items.EMERALD, 8), needsofNatureStack("mixed_liquid_bottle"), 4, 10, 0.2F));
 		});
 
 		// Level 4 (Expert) — flower mix is bought and sold.
@@ -92,10 +92,10 @@ public final class ModProfessions {
 					new ItemCost(Items.EMERALD, 5), needsofNatureStack("flower_mix"), 12, 8, 0.05F));
 		});
 
-		// Level 5 (Master) — the mixed liquid bottle.
+		// Level 5 (Master) — the entity liquid bottle.
 		TradeOfferHelper.registerVillagerOffers(NATURALIST, 5, trades -> {
 			trades.add((level, trader, random) -> new MerchantOffer(
-					new ItemCost(Items.EMERALD, 12), needsofNatureStack("mixed_liquid_bottle"), 4, 12, 0.2F));
+					new ItemCost(Items.EMERALD, 12), needsofNatureStack("entity_liquid_bottle"), 4, 12, 0.2F));
 		});
 	}
 
