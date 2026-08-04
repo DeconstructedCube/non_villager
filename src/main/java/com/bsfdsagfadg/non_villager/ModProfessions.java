@@ -151,10 +151,20 @@ public final class ModProfessions {
 				if (flowerMix == Items.AIR) return null;
 				return new MerchantOffer(new ItemCost(Items.EMERALD), new ItemStack(flowerMix, 2), 12, 8, 0.05F);
 			});
+			trades.add((level, trader, random) -> {
+				Item collector = needsofNatureItem("horse_liquid_collector");
+				if (collector == Items.AIR) return null;
+				return new MerchantOffer(new ItemCost(Items.EMERALD, 12), new ItemStack(collector), 4, 10, 0.05F);
+			});
 		});
 
-		// Level 5 (Master) — a random animal's liquid bottle.
+		// Level 5 (Master) — TWO random animal's liquid bottles.
 		TradeOfferHelper.registerVillagerOffers(NATURALIST, 5, trades -> {
+			trades.add((level, trader, random) -> {
+				ItemStack bottle = buildLiquidBottle(getRandomEntityId(random));
+				if (bottle == null) return null;
+				return new MerchantOffer(new ItemCost(Items.EMERALD, 12), bottle, 4, 12, 0.2F);
+			});
 			trades.add((level, trader, random) -> {
 				ItemStack bottle = buildLiquidBottle(getRandomEntityId(random));
 				if (bottle == null) return null;
