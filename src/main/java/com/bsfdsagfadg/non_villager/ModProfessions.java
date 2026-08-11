@@ -58,7 +58,6 @@ public final class ModProfessions {
 
 	/** Lazily resolved entity types that can produce liquid, from the mod's own data. */
 	private static List<Identifier> liquidEntities;
-
 	private ModProfessions() {
 	}
 
@@ -160,6 +159,7 @@ public final class ModProfessions {
 
 	private static Identifier getRandomEntityId(RandomSource random) {
 		List<Identifier> candidates = liquidEntities();
+		if (candidates.isEmpty()) return null;
 		return candidates.get(random.nextInt(candidates.size()));
 	}
 
