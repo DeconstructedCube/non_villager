@@ -33,6 +33,9 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// NeedsofNature soft dependency
+	modImplementation files('needsofnature-1.4.4.jar')
 }
 
 processResources {
