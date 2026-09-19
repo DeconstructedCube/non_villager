@@ -40,5 +40,6 @@ replay_*.log
 *.hprof
 *.jfr
 
-# local mod dependencies
-needsofnature-*.jar
+# local mod dependencies and old jars
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
