@@ -20,9 +20,8 @@ A villager profession themed around nature and life essence, with its work site 
 | 1 Novice | 3 Honey Bottle → 1 Emerald | 1 Emerald → Crimson Fungus |
 | 2 Apprentice | 2 Honeycomb → 1 Emerald | 1 Emerald → Warped Fungus |
 | 3 Journeyman | 1 Fertile Nectar potion → 5 Emeralds | 8 Emeralds → Mixed Liquid Bottle |
-| 4 Expert | 2 Flower Mix → 3 Emeralds | 5 Emeralds → Flower Mix |
-| 5 Master | — | 12 Emeralds → Entity Liquid Bottle |
-
+| 4 Expert | 4 Flower Mix → 1 Emerald | 1 Emerald → 2 Flower Mix<br>12 Emeralds → Horse Liquid Collector<br>5 Emeralds → Spray Bottle |
+| 5 Master | — | 12 Emeralds → Entity Liquid Bottle (2 offers) |
 Mod items are resolved lazily from the `needsofnature` registry at trade-generation time;
 a warning is logged instead of crashing if the mod is missing.
 

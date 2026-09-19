@@ -106,52 +106,51 @@ public final class ModProfessions {
 
 		// Level 3 (Journeyman) — buys fertile nectar (exact potion match), sells the mixed liquid bottle.
 		TradeOfferHelper.registerVillagerOffers(NATURALIST, 3, trades -> {
-			trades.add((level, trader, random) -> {
-				Holder<Potion> nectar = needsofNaturePotion("fertile_nectar");
-				if (nectar == null) return null;
+			Holder<Potion> nectar = needsofNaturePotion("fertile_nectar");
+			if (nectar != null) {
 				ItemStack nectarBottle = buildFertileNectarBottle(nectar);
-				if (nectarBottle == null) return null;
-				ItemCost cost = new ItemCost(nectarBottle.getItemHolder(), 1,
-						DataComponentExactPredicate.allOf(nectarBottle.getComponents()));
-				return new MerchantOffer(cost, new ItemStack(Items.EMERALD, 5), 12, 6, 0.05F);
-			});
+				if (nectarBottle != null) {
+					ItemCost cost = new ItemCost(nectarBottle.getItemHolder(), 1,
+							DataComponentExactPredicate.allOf(nectarBottle.getComponents()));
+					trades.add((level, trader, random) -> new MerchantOffer(
+							cost, new ItemStack(Items.EMERALD, 5), 12, 6, 0.05F));
+				}
+			}
 			trades.add((level, trader, random) -> {
 				ItemStack bottle = buildLiquidBottle(null);
-				if (bottle == null) return null;
 				return new MerchantOffer(new ItemCost(Items.EMERALD, 8), bottle, 4, 10, 0.2F);
 			});
 		});
 
-		// Level 4 (Expert) — flower mix is bought and sold. Three flowers craft one mix,
-		// so it is a cheap commodity: 4 mixes for 1 emerald, or 2 mixes for 1 emerald.
+		// Level 4 (Expert) — flower mix is bought and sold, horse liquid collector and spray bottle are sold.
 		TradeOfferHelper.registerVillagerOffers(NATURALIST, 4, trades -> {
-			trades.add((level, trader, random) -> {
-				Item flowerMix = needsofNatureItem("flower_mix");
-				if (flowerMix == Items.AIR) return null;
-				return new MerchantOffer(new ItemCost(flowerMix, 4), new ItemStack(Items.EMERALD), 12, 8, 0.05F);
-			});
-			trades.add((level, trader, random) -> {
-				Item flowerMix = needsofNatureItem("flower_mix");
-				if (flowerMix == Items.AIR) return null;
-				return new MerchantOffer(new ItemCost(Items.EMERALD), new ItemStack(flowerMix, 2), 12, 8, 0.05F);
-			});
-			trades.add((level, trader, random) -> {
-				Item collector = needsofNatureItem("horse_liquid_collector");
-				if (collector == Items.AIR) return null;
-				return new MerchantOffer(new ItemCost(Items.EMERALD, 12), new ItemStack(collector), 4, 10, 0.05F);
-			});
+			Item flowerMix = needsofNatureItem("flower_mix");
+			if (flowerMix != Items.AIR) {
+				trades.add((level, trader, random) -> new MerchantOffer(
+						new ItemCost(flowerMix, 4), new ItemStack(Items.EMERALD), 12, 8, 0.05F));
+				trades.add((level, trader, random) -> new MerchantOffer(
+						new ItemCost(Items.EMERALD), new ItemStack(flowerMix, 2), 12, 8, 0.05F));
+			}
+			Item collector = needsofNatureItem("horse_liquid_collector");
+			if (collector != Items.AIR) {
+				trades.add((level, trader, random) -> new MerchantOffer(
+						new ItemCost(Items.EMERALD, 12), new ItemStack(collector), 4, 10, 0.05F));
+			}
+			Item sprayBottle = needsofNatureItem("spray_bottle");
+			if (sprayBottle != Items.AIR) {
+				trades.add((level, trader, random) -> new MerchantOffer(
+						new ItemCost(Items.EMERALD, 5), new ItemStack(sprayBottle), 4, 8, 0.05F));
+			}
 		});
 
 		// Level 5 (Master) — TWO random animal's liquid bottles.
 		TradeOfferHelper.registerVillagerOffers(NATURALIST, 5, trades -> {
 			trades.add((level, trader, random) -> {
 				ItemStack bottle = buildLiquidBottle(getRandomEntityId(random));
-				if (bottle == null) return null;
 				return new MerchantOffer(new ItemCost(Items.EMERALD, 12), bottle, 4, 12, 0.2F);
 			});
 			trades.add((level, trader, random) -> {
 				ItemStack bottle = buildLiquidBottle(getRandomEntityId(random));
-				if (bottle == null) return null;
 				return new MerchantOffer(new ItemCost(Items.EMERALD, 12), bottle, 4, 12, 0.2F);
 			});
 		});
