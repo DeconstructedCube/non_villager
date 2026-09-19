@@ -1,4 +1,4 @@
-package com.bsfdsagfadg.non_villager.mixin;
+package com.deconstructedcube.non_villager.mixin;
 
 import java.util.Map;
 

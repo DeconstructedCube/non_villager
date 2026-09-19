@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "com.bsfdsagfadg.non_villager.mixin",
+	"package": "com.deconstructedcube.non_villager.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"PoiTypesAccessor"

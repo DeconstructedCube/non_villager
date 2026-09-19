@@ -5,18 +5,18 @@
 	"name": "NoN Villager Professions",
 	"description": "Custom villager professions without villager breeding. Add your own profession logic here.",
 	"authors": [
-		"bsfdsagfadg"
+		"DeconstructedCube"
 	],
 	"contact": {
-		"homepage": "https://github.com/bsfdsagfadg",
-		"sources": "https://github.com/bsfdsagfadg/non_villager"
+		"homepage": "https://github.com/DeconstructedCube",
+		"sources": "https://github.com/DeconstructedCube/non_villager"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/non_villager/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.bsfdsagfadg.non_villager.NonVillagerMod"
+			"com.deconstructedcube.non_villager.NonVillagerMod"
 		]
 	},
 	"mixins": [

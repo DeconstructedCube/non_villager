@@ -1,4 +1,4 @@
-package com.bsfdsagfadg.non_villager;
+package com.deconstructedcube.non_villager;
 
 import net.fabricmc.api.ModInitializer;
 

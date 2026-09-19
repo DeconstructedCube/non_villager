@@ -1,4 +1,4 @@
-package com.bsfdsagfadg.non_villager;
+package com.deconstructedcube.non_villager;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.block.Blocks;
 
-import com.bsfdsagfadg.non_villager.mixin.PoiTypesAccessor;
+import com.deconstructedcube.non_villager.mixin.PoiTypesAccessor;
 import com.nonid.NonAccessor;
 /**
  * Registers the Naturalist villager profession and its trades.
