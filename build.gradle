@@ -35,9 +35,8 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
 	// NeedsofNature soft dependency
-	modImplementation files('needsofnature-1.5.11.21.11.jar')
+	modImplementation files('libs/needsofnature-1.5.11.21.11.jar')
 }
-
 processResources {
 	def version = project.version
 	inputs.property "version", version

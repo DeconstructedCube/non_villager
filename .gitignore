@@ -43,3 +43,4 @@ replay_*.log
 # local mod dependencies and old jars
 *.jar
 !gradle/wrapper/gradle-wrapper.jar
+!libs/*.jar
